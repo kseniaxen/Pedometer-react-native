@@ -1,58 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Pedometer } from 'expo-sensors';
 
-export default class CountSteps extends React.Component {
-  state = {
-    isPedometerAvailable: 'checking',
-    currentStepCount: 0,
-  }
+export default function CountSteps() {
 
-  componentDidMount() {
-    this._subscribe()
-  }
+  const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking')
+  const [currentStepCount, setCurrentStepCount] = useState(0)
 
-  componentWillUnmount() {
-    this._unsubscribe()
-  }
+  let _subscription
 
-  _subscribe = () => {
-    this._subscription = Pedometer.watchStepCount(result => {
-      this.setState({
-        currentStepCount: result.steps,
-      })
+  const _subscribe = () => {
+    _subscription = Pedometer.watchStepCount(result => {
+      setCurrentStepCount(result.steps)
     })
 
     Pedometer.isAvailableAsync().then(
       result => {
-        this.setState({
-          isPedometerAvailable: String(result),
-        })
+        setIsPedometerAvailable(result)
       },
       error => {
-        this.setState({
-          isPedometerAvailable: 'Could not get isPedometerAvailable: ' + error,
-        })
+        setIsPedometerAvailable('Could not get isPedometerAvailable: ' + error)
       }
     )
   }
 
-  _unsubscribe = () => {
-    this._subscription && this._subscription.remove();
-    this._subscription = null;
+  const _unsubscribe = () => {
+    _subscription && _subscription.remove();
+    _subscription = null;
   }
 
-  render() {
+  useEffect(()=>{
+    _subscribe();
+    return ()=> _unsubscribe();
+  },[])
+
     return (
       <View>
-        <Text style={styles.stepsText}>{this.state.currentStepCount}</Text>
+        <Text style={styles.stepsText}>{currentStepCount}</Text>
       </View>
     )
-  }
 }
 
-const styles=StyleSheet.create({
-  stepsText:{
-    fontSize:18
+const styles = StyleSheet.create({
+  stepsText: {
+    fontSize: 18
   }
 })
