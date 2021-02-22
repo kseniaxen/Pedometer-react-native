@@ -1,6 +1,6 @@
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
-import CountSteps from './src/CountSteps'
+import CountSteps from './src/Components/CountSteps'
 
 export default function App() {
   return (
