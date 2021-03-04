@@ -7,7 +7,7 @@ import DisplayTimer from './Timer/DisplayTimer';
 
 export default function CountSteps() {
 
-  const [time, setTime] = useState({ ms: 0, s: 50, m: 59, h: 0 })
+  const [time, setTime] = useState({ ms: 0, s: 0, m: 0, h: 0 })
   const [interv, setInterv] = useState()
   const [status, setStatus] = useState(0)
   // Not started = 0
@@ -16,8 +16,6 @@ export default function CountSteps() {
 
   const [isPedometerAvailable, setIsPedometerAvailable] = useState('checking')
   const [currentStepCount, setCurrentStepCount] = useState(0)
-
-  let _subscription
 
   const start = () => {
     runTimer()
@@ -57,10 +55,16 @@ export default function CountSteps() {
     return setTime({ ms: updateMs, s: updateS, m: updateM, h: updateH })
   }
 
-  const _subscribe = () => {
-    _subscription = Pedometer.watchStepCount(result => {
-      setCurrentStepCount(result.steps)
-    })
+  let _subscription
+  const _subscribe = (curStatus) => {
+    console.log(curStatus);
+    if (curStatus === 1) {
+      _subscription = Pedometer.watchStepCount(result => {
+        setCurrentStepCount(currentStepCount+result.steps)
+      })
+    } else if (curStatus === 0) {
+      setCurrentStepCount(0);
+    }
 
     Pedometer.isAvailableAsync().then(
       result => {
@@ -78,16 +82,16 @@ export default function CountSteps() {
   }
 
   useEffect(() => {
-    _subscribe();
+    _subscribe(status);
     return () => _unsubscribe();
-  }, [])
+  }, [status])
 
   return (
     <View>
       <Text style={styles.stepsText}>{currentStepCount}</Text>
       <View>
         <DisplayTimer time={time} />
-        <ButtonTimer start={start} status={status} stop={stop} reset={reset} resume={resume}/>
+        <ButtonTimer start={start} status={status} stop={stop} reset={reset} resume={resume} />
       </View>
     </View>
   )

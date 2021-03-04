@@ -5,7 +5,7 @@ import CountSteps from './src/Components/CountSteps'
 export default function App() {
   return (
     <View style={styles.container}>
-      <CountSteps/>
+       <CountSteps/> 
     </View>
   );
 }
